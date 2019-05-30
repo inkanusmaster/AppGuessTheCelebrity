@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,14 +23,15 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-    String result, keyCelebrityName;
+    String result, keyCelebrityName, value;
     Pattern p;
     Matcher m;
     Map<String, String> celebrityMap = new HashMap<>();
     GridLayout buttonGridLayout;
     Button button;
+    String[] keys = new String[4];
 
-    public void initializeVars(){
+    public void initializeVars() {
         buttonGridLayout = findViewById(R.id.buttonGridLayout);
     }
 
@@ -104,12 +106,22 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NewApi")
     public void randomCelebrities() {
 
+
+
         for (int i = 0; i < buttonGridLayout.getChildCount(); i++) {
             keyCelebrityName = (String) Objects.requireNonNull(celebrityMap.keySet().toArray())[new Random().nextInt(Objects.requireNonNull(celebrityMap.keySet().toArray()).length)];
             button = (Button) buttonGridLayout.getChildAt(i);
             button.setText(keyCelebrityName);
+            keys[i] = keyCelebrityName;
         }
 
+        Log.i("Keys", Arrays.toString(keys));
+
+        int index = new Random().nextInt(keys.length);
+        String randomKey = (keys[index]);
+        Log.i("Random key", randomKey);
+        value = celebrityMap.get(randomKey);
+        Log.i("Random value",value);
 
     }
 
