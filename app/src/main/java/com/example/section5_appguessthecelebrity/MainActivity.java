@@ -1,6 +1,7 @@
 package com.example.section5_appguessthecelebrity;
 
-import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,25 +24,25 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("ALL")
 public class MainActivity extends AppCompatActivity {
 
-    String result, keyCelebrityName, value;
+    String result, keyCelebrityName, value, key;
     Pattern p;
     Matcher m;
-    Map<String, String> celebrityMap = new HashMap<>();
     GridLayout buttonGridLayout;
     Button button;
-    String[] keys = new String[4];
+    ImageView celebrityImageView;
+    String[] randomKeys = new String[4];
+    Map<String, String> celebrityHashMap = new HashMap<>();
 
     public void initializeVars() {
         buttonGridLayout = findViewById(R.id.buttonGridLayout);
+        celebrityImageView = findViewById(R.id.celebrityImageView);
     }
 
-
-    @SuppressLint("StaticFieldLeak")
     public class DownloadTask extends AsyncTask<String, Void, String> {
 
-        @Override
         protected String doInBackground(String... httpUrl) {
 
             StringBuilder result = new StringBuilder();
@@ -63,15 +66,30 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
                 return "Failed!";
             }
-
         }
     }
 
+    public class ImageDownloader extends AsyncTask<String, Void, Bitmap> {
 
-    public void downloadContent() {
+        protected Bitmap doInBackground(String... urls) {
+            try {
+                URL url = new URL(urls[0]);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.connect();
+                InputStream in = urlConnection.getInputStream();
+                Bitmap celebrityDownloadedBitmap = BitmapFactory.decodeStream(in);
+                return celebrityDownloadedBitmap;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    public void downloadSiteContent() {
 
         result = null;
-        celebrityMap.clear();
+        celebrityHashMap.clear();
         DownloadTask task = new DownloadTask();
 
         try {
@@ -89,48 +107,63 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             while (m.find()) {
-                celebrityMap.put(m.group(2), m.group(1));
+                celebrityHashMap.put(m.group(2), m.group(1));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(celebrityMap);
-
+        System.out.println(celebrityHashMap);
     }
 
+    public void insertCelebrityImage() {
+        ImageDownloader task = new ImageDownloader();
+        Bitmap celebrityBitmap;
+
+        try {
+            celebrityBitmap = task.execute(value).get();
+            celebrityImageView.setImageBitmap(celebrityBitmap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void checkAnswer(View view) {
-
+        Button b = (Button) view;
+        if (b.getText().toString().equals(key)) {
+            Toast.makeText(this, "Correct answer!", Toast.LENGTH_SHORT).show();
+            randomCelebrities();
+        } else {
+            Toast.makeText(this, "Wrong answer!", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    @SuppressLint("NewApi")
+    //ZRÓB LOSOWANIE KLUCZY DO BUTTONA BEZ POWTÓRZEN!!!!!!!!!!!!!
     public void randomCelebrities() {
-
-
+        String alreadyRandomed = "";
 
         for (int i = 0; i < buttonGridLayout.getChildCount(); i++) {
-            keyCelebrityName = (String) Objects.requireNonNull(celebrityMap.keySet().toArray())[new Random().nextInt(Objects.requireNonNull(celebrityMap.keySet().toArray()).length)];
+            keyCelebrityName = (String) Objects.requireNonNull(celebrityHashMap.keySet().toArray())[new Random().nextInt(Objects.requireNonNull(celebrityHashMap.keySet().toArray()).length)];
             button = (Button) buttonGridLayout.getChildAt(i);
             button.setText(keyCelebrityName);
-            keys[i] = keyCelebrityName;
+            randomKeys[i] = keyCelebrityName;
+            alreadyRandomed = keyCelebrityName;
         }
 
-        Log.i("Keys", Arrays.toString(keys));
-
-        int index = new Random().nextInt(keys.length);
-        String randomKey = (keys[index]);
-        Log.i("Random key", randomKey);
-        value = celebrityMap.get(randomKey);
-        Log.i("Random value",value);
+        Log.i("Keys", Arrays.toString(randomKeys));
+        int index = new Random().nextInt(randomKeys.length);
+        key = (randomKeys[index]);
+        Log.i("Random key", key);
+        value = celebrityHashMap.get(key);
+        Log.i("Random value", value);
+        insertCelebrityImage();
 
     }
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeVars();
-        downloadContent();
+        downloadSiteContent();
         randomCelebrities();
     }
 
