@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -16,8 +17,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView celebrityImageView;
     String[] randomKeys = new String[4];
     Map<String, String> celebrityHashMap = new HashMap<>();
+    List<String> alreadyRandomedList = new ArrayList<String>();
 
     public void initializeVars() {
         buttonGridLayout = findViewById(R.id.buttonGridLayout);
@@ -129,25 +133,41 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkAnswer(View view) {
         Button b = (Button) view;
-        if (b.getText().toString().equals(key)) {
-            Toast.makeText(this, "Correct answer!", Toast.LENGTH_SHORT).show();
-            randomCelebrities();
-        } else {
-            Toast.makeText(this, "Wrong answer!", Toast.LENGTH_SHORT).show();
+
+        try {
+            if (b.getText().toString().equals(key)) {
+                Toast toast = Toast.makeText(this, "CORRECT ANSWER!", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 150);
+                toast.show();
+                randomCelebrities();
+            } else {
+                Toast toast = Toast.makeText(this, "WRONG ANSWER!", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 150);
+                toast.show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
     }
 
-    //ZRÓB LOSOWANIE KLUCZY DO BUTTONA BEZ POWTÓRZEN!!!!!!!!!!!!!
     public void randomCelebrities() {
-        String alreadyRandomed = "";
+        alreadyRandomedList.clear();
+        int i=0;
 
-        for (int i = 0; i < buttonGridLayout.getChildCount(); i++) {
+        while(i < buttonGridLayout.getChildCount()){
             keyCelebrityName = (String) Objects.requireNonNull(celebrityHashMap.keySet().toArray())[new Random().nextInt(Objects.requireNonNull(celebrityHashMap.keySet().toArray()).length)];
-            button = (Button) buttonGridLayout.getChildAt(i);
-            button.setText(keyCelebrityName);
-            randomKeys[i] = keyCelebrityName;
-            alreadyRandomed = keyCelebrityName;
+            if (alreadyRandomedList.contains(keyCelebrityName)){
+                continue;
+            } else {
+                button = (Button) buttonGridLayout.getChildAt(i);
+                button.setText(keyCelebrityName);
+                randomKeys[i] = keyCelebrityName;
+                alreadyRandomedList.add(keyCelebrityName);
+                i++;
+            }
         }
+
 
         Log.i("Keys", Arrays.toString(randomKeys));
         int index = new Random().nextInt(randomKeys.length);
