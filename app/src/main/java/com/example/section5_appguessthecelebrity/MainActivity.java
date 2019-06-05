@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     public void randomCelebrities() {
@@ -168,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
         Log.i("Keys", Arrays.toString(randomKeys));
         int index = new Random().nextInt(randomKeys.length);
         key = (randomKeys[index]);
@@ -176,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
         value = celebrityHashMap.get(key);
         Log.i("Random value", value);
         insertCelebrityImage();
-
     }
 
     protected void onCreate(Bundle savedInstanceState) {
